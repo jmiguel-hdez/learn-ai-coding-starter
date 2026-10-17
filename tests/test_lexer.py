@@ -52,6 +52,20 @@ def test_string_may_contain_em_dash_and_opening_quote():
 
 
 @pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        ("“a\\nb”", "a\nb"),
+        ("“a\\tb”", "a\tb"),
+        ("“a\\”b”", "a”b"),
+        ("“a\\\\b”", "a\\b"),
+        ("“\\t\\n”", "\t\n"),
+    ],
+)
+def test_string_escapes(source: str, expected: str):
+    assert tokenize(source)[0].literal == expected
+
+
+@pytest.mark.parametrize(
     ("source", "line", "message"),
     [
         ('"hi"', 1, "straight quotes are not supported, use “ and ” for strings"),
