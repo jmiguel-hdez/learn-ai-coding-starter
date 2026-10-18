@@ -50,7 +50,10 @@ def test_check_reports_syntax_errors(tmp_path: Path):
     completed = run_cli("--check", str(program))
     assert completed.returncode == 1
     assert completed.stdout == ""
-    assert completed.stderr == "SlopLang syntax error at line 2: ship is only allowed inside a clanker\n"
+    assert (
+        completed.stderr
+        == "SlopLang syntax error at line 2: ship is only allowed inside a clanker\n"
+    )
 
 
 def test_check_without_file_is_usage_error():
