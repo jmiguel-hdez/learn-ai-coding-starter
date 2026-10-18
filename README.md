@@ -38,7 +38,7 @@ Prints `small slop` twice, then `big slop`.
 | SlopLang      | Conventional | Meaning                                                 |
 | ------------- | ------------ | ------------------------------------------------------- |
 | `slop`        | `let`        | Declare a mutable variable                              |
-| `loadbearing` | `const`      | Declare an immutable variable                           |
+| `loadbearing` | `const`      | Declare an immutable binding                            |
 | `clanker`     | `fn`         | Define a function                                       |
 | `vibe`        | `if`         | Conditional                                             |
 | `nah`         | `else`       | Else branch                                             |
@@ -89,7 +89,7 @@ Every brace block is a lexical scope. Assignment searches the current scope, the
 
 #### Loadbearing Variables
 
-`loadbearing` declares an immutable variable. It follows the same rules as `slop`: it requires an initializer, it can appear anywhere a `slop` declaration can (top level, blocks, `vibe`/`ralph` bodies, and `clanker` bodies), and it is scoped to the enclosing brace block. Assigning to a `loadbearing` name is a runtime error, whether the assignment is in the same scope, an inner block, or a `clanker` body.
+`loadbearing` declares an immutable binding. It follows the same rules as `slop`: it requires an initializer, it can appear anywhere a `slop` declaration can (top level, blocks, `vibe`/`ralph` bodies, and `clanker` bodies), and it is scoped to the enclosing brace block. Assigning to a `loadbearing` name is a runtime error, whether the assignment is in the same scope, an inner block, or a `clanker` body.
 
 ```slop
 loadbearing LIMIT = 100✨

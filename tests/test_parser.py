@@ -62,22 +62,21 @@ def test_assignment_is_not_an_expression():
 def test_slop_declaration():
     (declaration,) = parse_source("slop a = 1✨")
     assert isinstance(declaration, VarDecl) and declaration.mutable
-    assert not declaration.loadbearing
 
 
 def test_loadbearing_declaration():
     (declaration,) = parse_source("loadbearing LIMIT = 100✨")
     assert isinstance(declaration, VarDecl)
-    assert declaration.loadbearing and not declaration.mutable
+    assert not declaration.mutable
     assert declaration.name.lexeme == "LIMIT"
 
 
 def test_loadbearing_declaration_is_allowed_in_blocks_and_functions():
     (block, function) = parse_source("{ loadbearing a = 1✨ } clanker f() { loadbearing b = 2✨ }")
-    assert isinstance(block.statements[0], VarDecl) and block.statements[0].loadbearing
-    assert (
-        isinstance(function.body.statements[0], VarDecl) and function.body.statements[0].loadbearing
-    )
+    inner_block = block.statements[0]
+    inner_function = function.body.statements[0]
+    assert isinstance(inner_block, VarDecl) and not inner_block.mutable
+    assert isinstance(inner_function, VarDecl) and not inner_function.mutable
 
 
 @pytest.mark.parametrize(

@@ -78,8 +78,7 @@ class Parser:
         self.expect(TokenType.EQUAL, "expected '=' after variable name, an initializer is required")
         initializer = self.expression()
         self.terminator("variable declaration")
-        loadbearing = keyword.type is TokenType.LOADBEARING
-        return VarDecl(name, initializer, mutable=not loadbearing, loadbearing=loadbearing)
+        return VarDecl(name, initializer, mutable=keyword.type is TokenType.SLOP)
 
     def statement(self) -> Stmt:
         if self.check(TokenType.CLANKER):

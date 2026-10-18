@@ -34,7 +34,7 @@ Prints `small slop` twice, then `big slop`.
 | SlopLang      | Conventional | Meaning                                                 |
 | ------------- | ------------ | ------------------------------------------------------- |
 | `slop`        | `let`        | Declare a mutable variable                              |
-| `loadbearing` | `const`      | Declare an immutable variable                           |
+| `loadbearing` | `const`      | Declare an immutable binding                            |
 | `clanker`     | `fn`         | Define a function                                       |
 | `vibe`        | `if`         | Conditional                                             |
 | `nah`         | `else`       | Else branch                                             |
@@ -85,7 +85,7 @@ Every brace block is a lexical scope. Assignment searches the current scope, the
 
 ### Loadbearing Variables
 
-`loadbearing` declares an immutable variable. It follows the same rules as `slop`: it requires an initializer, it can appear anywhere a `slop` declaration can (top level, blocks, `vibe`/`ralph` bodies, and `clanker` bodies), and it is scoped to the enclosing brace block. Assigning to a `loadbearing` name is a runtime error, whether the assignment is in the same scope, an inner block, or a `clanker` body.
+`loadbearing` declares an immutable binding. It follows the same rules as `slop`: it requires an initializer, it can appear anywhere a `slop` declaration can (top level, blocks, `vibe`/`ralph` bodies, and `clanker` bodies), and it is scoped to the enclosing brace block. Assigning to a `loadbearing` name is a runtime error, whether the assignment is in the same scope, an inner block, or a `clanker` body.
 
 ```slop
 loadbearing LIMIT = 100✨
@@ -106,7 +106,7 @@ loadbearing LIMIT = 100✨
 LIMIT = 3✨             — runtime error: cannot assign to loadbearing 'LIMIT'
 ```
 
-`loadbearing` binds the name, not the value's contents, and values are already immutable, so there is nothing further to freeze. `clanker` names and `hallucinate` are also immutable, but assigning to them reports `cannot assign to immutable binding '<name>'`.
+`loadbearing` binds the name, not the value's contents, and values are already immutable, so there is nothing further to freeze. `clanker` names and `hallucinate` are `loadbearing` bindings too, so assigning to them reports `cannot assign to loadbearing '<name>'`.
 
 ## Control Flow
 
@@ -139,7 +139,7 @@ hallucinate(add(20, 22))✨
 
 `ship` returns one value; reaching the end of the body returns `nil`. `ship` outside a function and duplicate parameter names are syntax errors.
 
-A `clanker` name is an immutable binding in the global scope: it cannot be redeclared or assigned, and it is a value, so `slop f = add✨` followed by `f(1, 2)✨` works. Calling a non-function is a runtime error. Functions must be declared before they are called; mutual recursion works when both are declared before the first call. No nested or anonymous functions.
+A `clanker` name is a `loadbearing` binding in the global scope: it cannot be redeclared or assigned, and it is a value, so `slop f = add✨` followed by `f(1, 2)✨` works. Calling a non-function is a runtime error. Functions must be declared before they are called; mutual recursion works when both are declared before the first call. No nested or anonymous functions.
 
 Call depth is capped at 500 nested calls. Exceeding it is a runtime error (`stack overflow`), never a Python traceback.
 
