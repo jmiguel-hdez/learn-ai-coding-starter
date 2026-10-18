@@ -1,0 +1,17 @@
+— loadbearing declares a name that can never be reassigned.
+loadbearing LIMIT = 100✨
+slop score = 10✨
+
+score = score + 1✨
+hallucinate(score)✨
+hallucinate(LIMIT)✨
+
+— Inner blocks may shadow it, like any other name.
+{
+    loadbearing LIMIT = 5✨
+    hallucinate(LIMIT)✨
+}
+hallucinate(LIMIT)✨
+
+— Uncomment to see: SlopLang runtime error at line 17: cannot assign to loadbearing 'LIMIT'
+— LIMIT = 200✨

@@ -71,6 +71,83 @@ hallucinate(x)✨"""
     assert run(source) == "2\n"
 
 
+def test_loadbearing_can_be_read_and_slop_can_still_be_reassigned():
+    source = """loadbearing LIMIT = 100✨
+slop score = 10✨
+score = score + 1✨
+hallucinate(score + LIMIT)✨"""
+    assert run(source) == "111\n"
+
+
+def test_loadbearing_initializer_is_evaluated_once():
+    source = """loadbearing base = 2 * 3✨
+loadbearing derived = base + 1✨
+hallucinate(derived)✨"""
+    assert run(source) == "7\n"
+
+
+def test_loadbearing_may_be_shadowed_in_an_inner_scope():
+    source = """loadbearing X = 1✨
+{
+    slop X = 2✨
+    X = 3✨
+    hallucinate(X)✨
+}
+{
+    loadbearing X = 4✨
+    hallucinate(X)✨
+}
+hallucinate(X)✨"""
+    assert run(source) == "3\n4\n1\n"
+
+
+def test_shadowing_a_loadbearing_does_not_make_the_outer_one_assignable():
+    source = """loadbearing X = 1✨
+{
+    slop X = 2✨
+}
+X = 5✨"""
+    assert fails(source) == "SlopLang runtime error at line 5: cannot assign to loadbearing 'X'"
+
+
+def test_shadowing_slop_with_loadbearing_makes_the_inner_name_readonly():
+    source = """slop x = 1✨
+{
+    loadbearing x = 2✨
+    x = 3✨
+}"""
+    assert fails(source) == "SlopLang runtime error at line 4: cannot assign to loadbearing 'x'"
+
+
+def test_loadbearing_in_a_loop_body_is_fresh_each_iteration():
+    source = """slop i = 0✨
+ralph i < 3 {
+    loadbearing doubled = i * 2✨
+    hallucinate(doubled)✨
+    i = i + 1✨
+}"""
+    assert run(source) == "0\n2\n4\n"
+
+
+def test_loadbearing_in_a_function_is_local_per_call():
+    source = """clanker f(n) {
+    loadbearing twice = n * 2✨
+    ship twice✨
+}
+hallucinate(f(1))✨
+hallucinate(f(2))✨
+hallucinate(twice)✨"""
+    result = run_source(source)
+    assert result.stdout == "2\n4\n"
+    assert result.stderr == "SlopLang runtime error at line 7: undefined variable 'twice'\n"
+
+
+def test_failed_loadbearing_assignment_keeps_earlier_output():
+    result = run_source("loadbearing a = 1✨\nhallucinate(a)✨\na = 2✨\nhallucinate(a)✨")
+    assert result.stdout == "1\n"
+    assert result.stderr == "SlopLang runtime error at line 3: cannot assign to loadbearing 'a'\n"
+
+
 def test_loop_body_is_a_fresh_scope_each_iteration():
     source = """slop i = 0✨
 ralph i < 3 {

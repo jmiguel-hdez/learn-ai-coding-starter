@@ -62,6 +62,35 @@ def test_assignment_is_not_an_expression():
 def test_slop_declaration():
     (declaration,) = parse_source("slop a = 1✨")
     assert isinstance(declaration, VarDecl) and declaration.mutable
+    assert not declaration.loadbearing
+
+
+def test_loadbearing_declaration():
+    (declaration,) = parse_source("loadbearing LIMIT = 100✨")
+    assert isinstance(declaration, VarDecl)
+    assert declaration.loadbearing and not declaration.mutable
+    assert declaration.name.lexeme == "LIMIT"
+
+
+def test_loadbearing_declaration_is_allowed_in_blocks_and_functions():
+    (block, function) = parse_source("{ loadbearing a = 1✨ } clanker f() { loadbearing b = 2✨ }")
+    assert isinstance(block.statements[0], VarDecl) and block.statements[0].loadbearing
+    assert (
+        isinstance(function.body.statements[0], VarDecl) and function.body.statements[0].loadbearing
+    )
+
+
+@pytest.mark.parametrize(
+    ("source", "message"),
+    [
+        ("loadbearing x✨", r"expected '=' after variable name, an initializer is required"),
+        ("loadbearing = 1✨", r"expected a variable name after 'loadbearing', found '='"),
+        ("loadbearing x = 1", r"expected ✨ after variable declaration, but reached end of file"),
+    ],
+)
+def test_loadbearing_declaration_errors(source: str, message: str):
+    with pytest.raises(SlopSyntaxError, match=message):
+        parse_source(source)
 
 
 def test_control_flow_shapes():

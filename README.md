@@ -38,6 +38,7 @@ Prints `small slop` twice, then `big slop`.
 | SlopLang      | Conventional | Meaning                                                 |
 | ------------- | ------------ | ------------------------------------------------------- |
 | `slop`        | `let`        | Declare a mutable variable                              |
+| `loadbearing` | `const`      | Declare an immutable variable                           |
 | `clanker`     | `fn`         | Define a function                                       |
 | `vibe`        | `if`         | Conditional                                             |
 | `nah`         | `else`       | Else branch                                             |
@@ -50,7 +51,7 @@ Prints `small slop` twice, then `big slop`.
 | `✅`          | `true`       | Boolean true literal                                    |
 | `❌`          | `false`      | Boolean false literal                                   |
 
-There are no other reserved words, and no `break`, `continue`, `for`, or `else if`.
+These words are reserved and cannot be used as identifiers. There are no other reserved words, and no `break`, `continue`, `for`, or `else if`.
 
 ### Source Text
 
@@ -78,7 +79,6 @@ No implicit conversions.
 
 ```slop
 slop score = 10✨
-slop LIMIT = 100✨
 score = score + 5✨
 score = score + 1✨
 ```
@@ -86,6 +86,20 @@ score = score + 1✨
 Assignment is a statement, not an expression: `name = expression✨`. It updates the nearest existing `slop` variable. Reading or assigning an undefined name is a runtime error.
 
 Every brace block is a lexical scope. Assignment searches the current scope, then each enclosing scope.
+
+#### Loadbearing Variables
+
+`loadbearing` declares an immutable variable. It follows the same rules as `slop`: it requires an initializer, it can appear anywhere a `slop` declaration can (top level, blocks, `vibe`/`ralph` bodies, and `clanker` bodies), and it is scoped to the enclosing brace block. Assigning to a `loadbearing` name is a runtime error, whether the assignment is in the same scope, an inner block, or a `clanker` body.
+
+```slop
+loadbearing LIMIT = 100✨
+slop score = 10✨
+
+score = score + 1✨    — allowed
+LIMIT = 200✨         — runtime error: cannot assign to loadbearing 'LIMIT'
+```
+
+A scope cannot declare a name twice, and that holds across keywords: `slop x`, `loadbearing x`, or any combination of the two in the same scope is a runtime error (`'x' is already declared in this scope`). An inner block may shadow an outer `loadbearing` name with either `slop` or `loadbearing`; the outer binding is unaffected and stays unassignable.
 
 ### Control Flow
 
